@@ -16,7 +16,7 @@
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;background:var(--bg);color:var(--text);
-    font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Bengali",sans-serif}
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Bengali","Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
   .hidden{display:none !important}
 
   /* ---------- Login ---------- */
@@ -45,14 +45,24 @@
     padding:7px 12px;font-size:13px;cursor:pointer}
   header button:hover{color:var(--text)}
 
-  #messages{flex:1;overflow-y:auto;padding:14px 10px;display:flex;flex-direction:column;gap:4px;
-    background-color:var(--bg);
-    background-image:radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:18px 18px}
+  /* message area + big K❤T background */
+  .msgwrap{flex:1;position:relative;min-height:0;background-color:var(--bg);
+    background-image:radial-gradient(rgba(255,255,255,.02) 1px,transparent 1px);background-size:18px 18px;
+    overflow:hidden}
+  .watermark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    gap:.02em;pointer-events:none;user-select:none;-webkit-user-select:none;
+    font-weight:800;font-size:min(38vw,330px);line-height:1;letter-spacing:-.03em;
+    color:#e9edef;opacity:.075}
+  .watermark svg{width:.78em;height:.78em;flex:none;fill:#ff4d6d}
+  #messages{position:absolute;inset:0;overflow-y:auto;padding:14px 10px;display:flex;
+    flex-direction:column;gap:4px;background:transparent}
+
   .empty{margin:auto;color:var(--muted);font-size:14px}
   .row{display:flex}
   .row.me{justify-content:flex-end}
   .bubble{max-width:78%;padding:6px 9px 5px;border-radius:9px;position:relative;
-    box-shadow:0 1px 0.5px rgba(0,0,0,.35);word-wrap:break-word;overflow-wrap:anywhere}
+    box-shadow:0 1px 0.5px rgba(0,0,0,.35);word-wrap:break-word;overflow-wrap:anywhere;
+    -webkit-touch-callout:none}
   .me .bubble{background:var(--sent);border-top-right-radius:2px}
   .them .bubble{background:var(--recv);border-top-left-radius:2px}
   .sender{font-size:12.5px;font-weight:600;margin-bottom:2px}
@@ -64,6 +74,27 @@
   .timer{background:rgba(0,0,0,.28);padding:1px 6px;border-radius:8px;font-size:10.5px;color:#ffd479}
   .del{background:transparent;border:0;color:var(--danger);font-size:11px;cursor:pointer;
     padding:1px 4px;text-decoration:underline}
+  .reactbtn{background:transparent;border:0;color:rgba(233,237,239,.55);cursor:pointer;
+    font-size:14px;padding:0 3px;line-height:1}
+  .reactbtn:hover{color:var(--text)}
+
+  /* reactions */
+  .reacts{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+  .chip{display:inline-flex;align-items:center;gap:3px;background:rgba(0,0,0,.3);
+    border:1px solid transparent;border-radius:12px;padding:1px 7px;font-size:13px;
+    cursor:pointer;color:var(--text);line-height:1.4}
+  .chip.mine{border-color:var(--accent);background:rgba(0,168,132,.25)}
+  .chip small{font-size:11px;color:var(--muted)}
+
+  #picker{position:fixed;z-index:50;background:#233138;border-radius:28px;padding:6px 8px;
+    box-shadow:0 4px 18px rgba(0,0,0,.55);display:flex;gap:2px;align-items:center;
+    max-width:calc(100vw - 16px)}
+  #picker button{background:transparent;border:0;font-size:26px;cursor:pointer;border-radius:50%;
+    width:40px;height:40px;line-height:1;color:var(--text);transition:transform .1s}
+  #picker button:hover{transform:scale(1.25)}
+  #picker.expanded{border-radius:16px;flex-wrap:wrap;width:min(330px,calc(100vw - 16px));
+    max-height:260px;overflow-y:auto}
+  #picker.expanded button{font-size:24px}
 
   form#sendForm{display:flex;gap:8px;padding:8px 10px;background:var(--panel);
     padding-bottom:max(8px,env(safe-area-inset-bottom))}
@@ -72,6 +103,29 @@
   #sendBtn{width:46px;height:46px;border-radius:50%;border:0;background:var(--accent);cursor:pointer;
     display:flex;align-items:center;justify-content:center;flex:none}
   #sendBtn svg{width:22px;height:22px;fill:#06130f}
+
+  /* photos */
+  #attachBtn{width:42px;height:46px;border:0;background:transparent;color:var(--muted);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;flex:none}
+  #attachBtn:hover{color:var(--text)}
+  #attachBtn svg{width:26px;height:26px;fill:currentColor}
+  #preview{display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--panel);
+    border-top:1px solid #111b21}
+  #preview img{max-height:90px;max-width:60%;border-radius:8px;object-fit:cover}
+  #preview button{background:var(--input);border:0;color:var(--text);width:30px;height:30px;
+    border-radius:50%;cursor:pointer;font-size:14px}
+  .pic{display:block;max-width:min(70vw,320px);max-height:320px;width:auto;height:auto;
+    object-fit:cover;border-radius:6px;margin-bottom:4px;cursor:zoom-in;background:rgba(0,0,0,.25)}
+  .dlbtn{background:transparent;border:0;color:rgba(233,237,239,.7);cursor:pointer;
+    font-size:13px;padding:0 3px;line-height:1}
+  .dlbtn:hover{color:var(--text)}
+  #viewer{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.93);display:flex;
+    flex-direction:column;align-items:center;justify-content:center;padding:12px}
+  #viewer .vbar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:flex-end;gap:10px;
+    padding:max(12px,env(safe-area-inset-top)) 14px 12px}
+  #viewer .vbar button{background:#2a3942;border:0;color:var(--text);padding:9px 16px;
+    border-radius:20px;font-size:14px;cursor:pointer}
+  #viewer img{max-width:100%;max-height:82vh;object-fit:contain;border-radius:4px}
 </style>
 </head>
 <body>
@@ -97,13 +151,41 @@
     </div>
     <button id="logoutBtn" type="button">Logout</button>
   </header>
-  <div id="messages"></div>
+
+  <div class="msgwrap">
+    <div class="watermark" aria-hidden="true">
+      <span>K</span>
+      <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      <span>T</span>
+    </div>
+    <div id="messages"></div>
+  </div>
+
+  <div id="preview" class="hidden">
+    <img id="previewImg" alt="">
+    <button id="previewX" type="button" aria-label="Remove photo">✕</button>
+  </div>
+
   <form id="sendForm" autocomplete="off">
+    <button id="attachBtn" type="button" aria-label="Attach photo">
+      <svg viewBox="0 0 24 24"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5z"/></svg>
+    </button>
+    <input id="fileInput" type="file" accept="image/*" class="hidden">
     <input id="msgInput" type="text" placeholder="Type a message" maxlength="2000">
     <button id="sendBtn" type="submit" aria-label="Send">
       <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
     </button>
   </form>
+</div>
+
+<div id="picker" class="hidden"></div>
+
+<div id="viewer" class="hidden">
+  <div class="vbar">
+    <button id="vdl" type="button">⬇ Download</button>
+    <button id="vclose" type="button">✕ Close</button>
+  </div>
+  <img id="vimg" alt="">
 </div>
 
 <script type="module">
@@ -132,12 +214,12 @@ const ADMIN_USERNAME = "tajul121300";
 /* =====================================================================
    3) OTHER SETTINGS
    ---------------------------------------------------------------------
-   Accounts for the 5 members must be created manually in
+   Accounts must be created manually in
    Firebase Console → Authentication → Users → Add user
    (email = username@privatechat.local, plus a password).
-   Disable any public sign-up there; this app has no registration flow.
+   This app has no registration flow.
 
-   Suggested Firestore security rules (Firestore → Rules):
+   Firestore security rules (Firestore → Rules → Publish):
 
    rules_version = '2';
    service cloud.firestore {
@@ -147,10 +229,16 @@ const ADMIN_USERNAME = "tajul121300";
          allow read: if request.auth != null;
          allow create: if request.auth != null
                        && request.resource.data.uid == request.auth.uid;
-         allow update: if request.auth != null
-                       && request.auth.uid != resource.data.uid
-                       && resource.data.seenAt == null
-                       && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seenAt']);
+         allow update: if request.auth != null && (
+                         ( request.auth.uid != resource.data.uid
+                           && resource.data.seenAt == null
+                           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seenAt']) )
+                         ||
+                         ( request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions'])
+                           && request.resource.data.reactions
+                                .diff(resource.data.get('reactions', {}))
+                                .affectedKeys().hasOnly([request.auth.uid]) )
+                       );
          allow delete: if request.auth != null
                        && (isAdmin()
                            || (resource.data.seenAt != null
@@ -162,10 +250,16 @@ const ADMIN_USERNAME = "tajul121300";
 const EXPIRE_MS = 10 * 60 * 1000;   // 10 minutes after seen
 const CHECK_MS  = 2000;             // periodic check interval
 
+const QUICK_EMOJI = ["❤️","👍","😂","😮","😢","🙏"];
+const MORE_EMOJI  = ["😀","😃","😄","😁","😆","😅","🤣","😊","😇","🙂","😉","😍","🥰","😘","😋","😎","🤩","🥳",
+  "😏","😒","😞","😔","😟","😕","😣","😭","😤","😡","🤬","😱","😨","😰","😥","😓","🤔","🤗","🤭","🤫",
+  "😴","🤤","😷","🤒","🤕","🤢","🥵","🥶","🤯","🥺","😳","🙄","😬","👏","🙌","👎","👌","✌️","🤞","🤝",
+  "💪","👀","🔥","💯","✨","🎉","💔","💕","💖","😈","💀","🤡","👻","🌹","☕","🍕","⚽","🎂"];
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, updateDoc, deleteDoc, doc }
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, updateDoc, deleteDoc, deleteField, doc }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* ---------- Google "G" icon (inline SVG) ---------- */
@@ -219,11 +313,18 @@ async function setupManifest(){
 }
 setupManifest();
 
+/* ---------- Service worker (needed for Android notifications; file: sw.js) ---------- */
+if ("serviceWorker" in navigator){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+
 /* ---------- DOM refs ---------- */
 const $ = id => document.getElementById(id);
 const loginView = $("login"), chatView = $("chat");
 const loginForm = $("loginForm"), loginBtn = $("loginBtn"), loginError = $("loginError");
-const messagesEl = $("messages"), statusEl = $("status");
+const messagesEl = $("messages"), statusEl = $("status"), pickerEl = $("picker");
 
 function showLoginError(msg){ loginError.textContent = msg || ""; }
 
@@ -266,9 +367,68 @@ function colorFor(name){
   return COLORS[h % COLORS.length];
 }
 
+/* ---------- Notifications + sound ---------- */
+let actx = null, notifIcon = null, unread = 0;
+
+function initAudio(){
+  try{
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === "suspended") actx.resume();
+  }catch(e){}
+}
+function beep(){
+  try{
+    if (!actx) return;
+    const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
+    o.type = "sine"; o.frequency.value = 880;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.15, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+    o.connect(g); g.connect(actx.destination);
+    o.start(t); o.stop(t + 0.26);
+  }catch(e){}
+}
+function askNotifPermission(){
+  try{
+    if ("Notification" in window && Notification.permission === "default"){
+      Notification.requestPermission();
+    }
+  }catch(e){}
+}
+async function showNotif(title, body, tag){
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  if (!notifIcon) notifIcon = await makePng(192);
+  const opts = { body, tag, renotify: true, vibrate: [150, 80, 150] };
+  if (notifIcon){ opts.icon = notifIcon; opts.badge = notifIcon; }
+  try{
+    const reg = "serviceWorker" in navigator ? await navigator.serviceWorker.getRegistration() : null;
+    if (reg && reg.showNotification){ await reg.showNotification(title, opts); return; }
+  }catch(e){}
+  try{ new Notification(title, opts); }catch(e){}
+}
+function updateTitle(){ document.title = unread > 0 ? "(" + unread + ") KT" : "KT"; }
+function isActive(){ return document.visibilityState === "visible" && document.hasFocus(); }
+function onIncoming(id, d){
+  if (isActive()){ beep(); return; }
+  unread++; updateTitle();
+  const body = d.image ? ("📷 " + (d.text || "Photo")) : (d.text || "");
+  showNotif(d.username || "KT", body, "kt-" + id);
+}
+function onBecameActive(){
+  if (document.visibilityState === "visible"){
+    unread = 0; updateTitle();
+    markSeen();
+  }
+}
+document.addEventListener("visibilitychange", onBecameActive);
+window.addEventListener("focus", onBecameActive);
+document.addEventListener("pointerdown", initAudio, { once: true });
+
 /* ---------- Login ---------- */
 loginForm.addEventListener("submit", async e => {
   e.preventDefault();
+  askNotifPermission();   // must run inside the tap/click
+  initAudio();
   showLoginError("");
   if (configMissing){ showLoginError("Firebase config missing."); return; }
   const username = $("username").value;
@@ -288,7 +448,7 @@ $("logoutBtn").addEventListener("click", () => { if (auth) signOut(auth); });
 
 /* ---------- Chat state ---------- */
 let currentUser = null, isAdmin = false;
-let unsub = null, timerId = null;
+let unsub = null, timerId = null, firstSnap = true;
 let messages = [];                 // [{id, ...data}]
 const deleting = new Set();        // ids with a delete in flight
 const marking  = new Set();        // ids with a seen-update in flight
@@ -314,9 +474,20 @@ if (auth){
 
 function startChat(){
   stopChat();
+  firstSnap = true;
   const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
   unsub = onSnapshot(q, snap => {
+    const wasFirst = firstSnap;
+    firstSnap = false;
     messages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (!wasFirst){
+      snap.docChanges().forEach(ch => {
+        if (ch.type === "added" && !ch.doc.metadata.hasPendingWrites){
+          const d = ch.doc.data();
+          if (d.uid !== currentUser.uid) onIncoming(ch.doc.id, d);
+        }
+      });
+    }
     render();
     markSeen();
     purgeExpired();
@@ -330,7 +501,77 @@ function stopChat(){
   if (timerId){ clearInterval(timerId); timerId = null; }
   messages = [];
   messagesEl.innerHTML = "";
+  closePicker();
+  closeViewer();
+  clearPending();
+  unread = 0; updateTitle();
 }
+
+/* ---------- Reactions ---------- */
+async function setReaction(id, emoji){
+  if (!currentUser) return;
+  const m = messages.find(x => x.id === id);
+  if (!m) return;
+  const cur = m.reactions && m.reactions[currentUser.uid] && m.reactions[currentUser.uid].e;
+  const path = "reactions." + currentUser.uid;
+  try{
+    if (cur === emoji){
+      await updateDoc(doc(db, "messages", id), { [path]: deleteField() });
+    }else{
+      await updateDoc(doc(db, "messages", id), { [path]: { e: emoji, n: nameFromEmail(currentUser.email) } });
+    }
+  }catch(e){
+    statusEl.textContent = "Reaction failed";
+  }
+}
+
+let pickerId = null, pickerAnchor = null;
+function buildPicker(expanded){
+  pickerEl.innerHTML = "";
+  pickerEl.classList.toggle("expanded", expanded);
+  const list = expanded ? QUICK_EMOJI.concat(MORE_EMOJI) : QUICK_EMOJI;
+  for (const em of list){
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = em;
+    b.addEventListener("click", () => { const id = pickerId; closePicker(); setReaction(id, em); });
+    pickerEl.appendChild(b);
+  }
+  if (!expanded){
+    const more = document.createElement("button");
+    more.type = "button"; more.textContent = "＋"; more.style.fontSize = "22px";
+    more.addEventListener("click", () => { buildPicker(true); placePicker(); });
+    pickerEl.appendChild(more);
+  }
+}
+function placePicker(){
+  if (!pickerAnchor) return;
+  const r = pickerAnchor.getBoundingClientRect();
+  const pw = pickerEl.offsetWidth, ph = pickerEl.offsetHeight;
+  let top = r.top - ph - 8;
+  if (top < 8) top = Math.min(r.bottom + 8, window.innerHeight - ph - 8);
+  let left = r.left;
+  if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+  if (left < 8) left = 8;
+  pickerEl.style.top = top + "px";
+  pickerEl.style.left = left + "px";
+}
+function openPicker(id, anchor){
+  pickerId = id; pickerAnchor = anchor;
+  pickerEl.classList.remove("hidden");
+  buildPicker(false);
+  placePicker();
+}
+function closePicker(){
+  pickerEl.classList.add("hidden");
+  pickerId = null; pickerAnchor = null;
+}
+document.addEventListener("pointerdown", e => {
+  if (pickerEl.classList.contains("hidden")) return;
+  if (pickerEl.contains(e.target) || e.target.closest(".reactbtn")) return;
+  closePicker();
+});
+messagesEl.addEventListener("scroll", closePicker, { passive: true });
+window.addEventListener("resize", closePicker);
 
 /* ---------- Render ---------- */
 function render(){
@@ -360,10 +601,51 @@ function render(){
       b.appendChild(s);
     }
 
-    const t = document.createElement("div");
-    t.className = "text";
-    t.textContent = m.text;
-    b.appendChild(t);
+    if (m.image){
+      const im = document.createElement("img");
+      im.className = "pic";
+      if (m.iw && m.ih){ im.width = m.iw; im.height = m.ih; }
+      im.alt = "Photo";
+      im.src = m.image;
+      im.addEventListener("click", () => openViewer(m));
+      b.appendChild(im);
+    }
+    if (m.text){
+      const t = document.createElement("div");
+      t.className = "text";
+      t.textContent = m.text;
+      b.appendChild(t);
+    }
+
+    /* reaction chips */
+    const groups = {};
+    for (const [uid, r] of Object.entries(m.reactions || {})){
+      if (!r || !r.e) continue;
+      if (!groups[r.e]) groups[r.e] = { names: [], mine: false };
+      groups[r.e].names.push(r.n || "user");
+      if (uid === currentUser.uid) groups[r.e].mine = true;
+    }
+    const emojis = Object.keys(groups);
+    if (emojis.length){
+      const rc = document.createElement("div");
+      rc.className = "reacts";
+      for (const em of emojis){
+        const g = groups[em];
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "chip" + (g.mine ? " mine" : "");
+        chip.title = g.names.join(", ");
+        chip.textContent = em;
+        if (g.names.length > 1){
+          const n = document.createElement("small");
+          n.textContent = g.names.length;
+          chip.appendChild(n);
+        }
+        chip.addEventListener("click", () => setReaction(m.id, em));
+        rc.appendChild(chip);
+      }
+      b.appendChild(rc);
+    }
 
     const meta = document.createElement("div");
     meta.className = "meta";
@@ -374,6 +656,20 @@ function render(){
       tm.dataset.id = m.id;
       tm.textContent = "⏱ " + fmtRemain(m.seenAt + EXPIRE_MS - now);
       meta.appendChild(tm);
+    }
+
+    const rb = document.createElement("button");
+    rb.type = "button"; rb.className = "reactbtn"; rb.textContent = "☺";
+    rb.title = "React";
+    rb.addEventListener("click", ev => { ev.stopPropagation(); openPicker(m.id, b); });
+    meta.appendChild(rb);
+
+    if (m.image){
+      const dl = document.createElement("button");
+      dl.type = "button"; dl.className = "dlbtn"; dl.textContent = "⬇";
+      dl.title = "Download photo";
+      dl.addEventListener("click", ev => { ev.stopPropagation(); downloadImage(m.image, "KT-" + m.id + ".jpg"); });
+      meta.appendChild(dl);
     }
 
     const time = document.createElement("span");
@@ -397,6 +693,17 @@ function render(){
     }
 
     b.appendChild(meta);
+
+    /* open the picker: double-click, right-click, or long-press */
+    b.addEventListener("dblclick", () => openPicker(m.id, b));
+    b.addEventListener("contextmenu", ev => { ev.preventDefault(); openPicker(m.id, b); });
+    let lp = null;
+    const stopLp = () => { if (lp){ clearTimeout(lp); lp = null; } };
+    b.addEventListener("touchstart", () => { stopLp(); lp = setTimeout(() => { lp = null; openPicker(m.id, b); }, 450); }, { passive: true });
+    b.addEventListener("touchmove", stopLp, { passive: true });
+    b.addEventListener("touchend", stopLp, { passive: true });
+    b.addEventListener("touchcancel", stopLp, { passive: true });
+
     row.appendChild(b);
     messagesEl.appendChild(row);
   }
@@ -414,8 +721,6 @@ async function markSeen(){
     }
   }
 }
-document.addEventListener("visibilitychange", markSeen);
-window.addEventListener("focus", markSeen);
 
 /* ---------- Periodic timer + auto-delete ---------- */
 async function purgeExpired(){
@@ -443,25 +748,126 @@ function tick(){
   markSeen();
 }
 
+/* ---------- Photos: compress, preview, view, download ---------- */
+/* Photos are shrunk in the browser and stored inside the Firestore message
+   (Firebase Storage needs a paid plan). Each message must stay under 1 MB. */
+let pending = null;   // { url, w, h }
+const MAX_IMG_CHARS = 700000;
+
+function flash(msg){
+  const old = statusEl.textContent;
+  statusEl.textContent = msg;
+  setTimeout(() => { if (statusEl.textContent === msg) statusEl.textContent = old; }, 3000);
+}
+function loadImage(file){
+  return new Promise((resolve, reject) => {
+    const u = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(u); resolve(img); };
+    img.onerror = () => { URL.revokeObjectURL(u); reject(new Error("load")); };
+    img.src = u;
+  });
+}
+async function compressImage(file){
+  const img = await loadImage(file);
+  let maxDim = 1280, q = 0.72;
+  for (let i = 0; i < 10; i++){
+    const scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+    const w = Math.max(1, Math.round(img.naturalWidth * scale));
+    const h = Math.max(1, Math.round(img.naturalHeight * scale));
+    const c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    const x = c.getContext("2d");
+    x.fillStyle = "#ffffff";
+    x.fillRect(0, 0, w, h);
+    x.drawImage(img, 0, 0, w, h);
+    const url = c.toDataURL("image/jpeg", q);
+    if (url.length <= MAX_IMG_CHARS) return { url, w, h };
+    if (q > 0.45) q -= 0.1; else maxDim = Math.round(maxDim * 0.8);
+  }
+  throw new Error("too big");
+}
+function setPending(p){
+  pending = p;
+  $("previewImg").src = p.url;
+  $("preview").classList.remove("hidden");
+}
+function clearPending(){
+  pending = null;
+  $("preview").classList.add("hidden");
+  $("previewImg").removeAttribute("src");
+}
+$("attachBtn").addEventListener("click", () => $("fileInput").click());
+$("previewX").addEventListener("click", clearPending);
+$("fileInput").addEventListener("change", async () => {
+  const f = $("fileInput").files[0];
+  $("fileInput").value = "";
+  if (!f) return;
+  if (!f.type.startsWith("image/")){ flash("Images only"); return; }
+  try{
+    setPending(await compressImage(f));
+  }catch(e){
+    flash("Photo failed");
+  }
+});
+
+async function downloadImage(src, name){
+  try{
+    const blob = await (await fetch(src)).blob();
+    const u = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = u; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(u), 3000);
+  }catch(e){
+    const a = document.createElement("a");
+    a.href = src; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+}
+let viewerMsg = null;
+function openViewer(m){
+  viewerMsg = m;
+  $("vimg").src = m.image;
+  $("viewer").classList.remove("hidden");
+}
+function closeViewer(){
+  viewerMsg = null;
+  $("viewer").classList.add("hidden");
+  $("vimg").removeAttribute("src");
+}
+$("vclose").addEventListener("click", closeViewer);
+$("vdl").addEventListener("click", () => {
+  if (viewerMsg) downloadImage(viewerMsg.image, "KT-" + viewerMsg.id + ".jpg");
+});
+$("viewer").addEventListener("click", e => { if (e.target === $("viewer")) closeViewer(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeViewer(); });
+
 /* ---------- Send ---------- */
 $("sendForm").addEventListener("submit", async e => {
   e.preventDefault();
   const input = $("msgInput");
   const text = input.value.trim();
-  if (!text || !currentUser) return;
+  const img = pending;
+  if ((!text && !img) || !currentUser) return;
   input.value = "";
+  clearPending();
   try{
-    await addDoc(collection(db, "messages"), {
+    const data = {
       text,
       uid: currentUser.uid,
       username: nameFromEmail(currentUser.email),
       createdAt: Date.now(),
-      seenAt: null
-    });
+      seenAt: null,
+      reactions: {}
+    };
+    if (img){ data.image = img.url; data.iw = img.w; data.ih = img.h; }
+    await addDoc(collection(db, "messages"), data);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }catch(err){
     input.value = text;
-    statusEl.textContent = "Send failed";
+    if (img) setPending(img);
+    flash("Send failed");
   }
   input.focus();
 });
