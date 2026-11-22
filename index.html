@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#202c33">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>KT</title>
+<link id="favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3C/svg%3E">
+<link id="manifest-link" rel="manifest" href="">
+<style>
+  :root{
+    --bg:#0b141a; --panel:#202c33; --input:#2a3942; --sent:#005c4b; --recv:#202c33;
+    --text:#e9edef; --muted:#8696a0; --accent:#00a884; --blue:#53bdeb; --danger:#f15c6d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;background:var(--bg);color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Bengali",sans-serif}
+  .hidden{display:none !important}
+
+  /* ---------- Login ---------- */
+  #login{height:100%;display:flex;align-items:center;justify-content:center;padding:20px}
+  #login form{width:100%;max-width:340px;display:flex;flex-direction:column;gap:14px}
+  #login input{width:100%;padding:14px 16px;border-radius:10px;border:1px solid transparent;
+    background:var(--input);color:var(--text);font-size:16px;outline:none}
+  #login input:focus{border-color:var(--accent)}
+  #login button{padding:14px;border:0;border-radius:10px;background:var(--accent);color:#06130f;
+    font-size:16px;font-weight:600;cursor:pointer}
+  #login button:disabled{opacity:.6;cursor:default}
+  #loginError{color:var(--danger);font-size:14px;text-align:center;min-height:0}
+
+  /* ---------- Chat ---------- */
+  #chat{height:100dvh;display:flex;flex-direction:column;max-width:900px;margin:0 auto;
+    background:var(--bg);border-left:1px solid #111b21;border-right:1px solid #111b21}
+  header{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--panel);
+    padding-top:max(10px,env(safe-area-inset-top))}
+  header .logo{width:38px;height:38px;border-radius:50%;background:#fff;display:flex;
+    align-items:center;justify-content:center;flex:none}
+  header .logo svg{width:24px;height:24px}
+  header .info{flex:1;min-width:0}
+  header .name{font-weight:600;font-size:16px}
+  header .status{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  header button{background:transparent;border:1px solid #3b4a54;color:var(--muted);border-radius:8px;
+    padding:7px 12px;font-size:13px;cursor:pointer}
+  header button:hover{color:var(--text)}
+
+  #messages{flex:1;overflow-y:auto;padding:14px 10px;display:flex;flex-direction:column;gap:4px;
+    background-color:var(--bg);
+    background-image:radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:18px 18px}
+  .empty{margin:auto;color:var(--muted);font-size:14px}
+  .row{display:flex}
+  .row.me{justify-content:flex-end}
+  .bubble{max-width:78%;padding:6px 9px 5px;border-radius:9px;position:relative;
+    box-shadow:0 1px 0.5px rgba(0,0,0,.35);word-wrap:break-word;overflow-wrap:anywhere}
+  .me .bubble{background:var(--sent);border-top-right-radius:2px}
+  .them .bubble{background:var(--recv);border-top-left-radius:2px}
+  .sender{font-size:12.5px;font-weight:600;margin-bottom:2px}
+  .text{font-size:15px;line-height:1.35;white-space:pre-wrap}
+  .meta{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-top:3px;
+    font-size:11px;color:rgba(233,237,239,.6);flex-wrap:wrap}
+  .tick{font-size:12px;letter-spacing:-2px}
+  .tick.seen{color:var(--blue)}
+  .timer{background:rgba(0,0,0,.28);padding:1px 6px;border-radius:8px;font-size:10.5px;color:#ffd479}
+  .del{background:transparent;border:0;color:var(--danger);font-size:11px;cursor:pointer;
+    padding:1px 4px;text-decoration:underline}
+
+  form#sendForm{display:flex;gap:8px;padding:8px 10px;background:var(--panel);
+    padding-bottom:max(8px,env(safe-area-inset-bottom))}
+  #msgInput{flex:1;padding:12px 16px;border-radius:22px;border:0;background:var(--input);
+    color:var(--text);font-size:16px;outline:none}
+  #sendBtn{width:46px;height:46px;border-radius:50%;border:0;background:var(--accent);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;flex:none}
+  #sendBtn svg{width:22px;height:22px;fill:#06130f}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="login">
+  <form id="loginForm" autocomplete="on">
+    <input id="username" type="text" placeholder="Username" autocomplete="username"
+           autocapitalize="none" autocorrect="off" spellcheck="false" required>
+    <input id="password" type="password" placeholder="Password" autocomplete="current-password" required>
+    <button id="loginBtn" type="submit">Login</button>
+    <div id="loginError"></div>
+  </form>
+</div>
+
+<!-- ================= CHAT ================= -->
+<div id="chat" class="hidden">
+  <header>
+    <div class="logo" id="headerLogo"></div>
+    <div class="info">
+      <div class="name">KT</div>
+      <div class="status" id="status"></div>
+    </div>
+    <button id="logoutBtn" type="button">Logout</button>
+  </header>
+  <div id="messages"></div>
+  <form id="sendForm" autocomplete="off">
+    <input id="msgInput" type="text" placeholder="Type a message" maxlength="2000">
+    <button id="sendBtn" type="submit" aria-label="Send">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
+  </form>
+</div>
+
+<script type="module">
+/* =====================================================================
+   1) FIREBASE CONFIG  — PASTE YOUR PROJECT KEYS HERE
+   ---------------------------------------------------------------------
+   Firebase Console → Project settings → General → "Your apps" → Web app
+   → copy the firebaseConfig values and replace the placeholders below.
+   ===================================================================== */
+const firebaseConfig = {
+  apiKey:            "AIzaSyBl4_bKRVQEAXpH8TGUitqHdyBjzdNq8PI",
+  authDomain:        "kt-chat-386d4.firebaseapp.com",
+  projectId:         "kt-chat-386d4",
+  storageBucket:     "kt-chat-386d4.firebasestorage.app",
+  messagingSenderId: "670691205556",
+  appId:             "1:670691205556:web:ff7857b55568e1df35d2e1"
+};
+
+/* =====================================================================
+   2) ADMIN SETTINGS
+   ===================================================================== */
+const ADMIN_UID      = "lwVSjwQBnaYkrJnmrNUh4l2Nu3B3";
+const ADMIN_EMAIL    = "tajul121300@gmail.com";
+const ADMIN_USERNAME = "tajul121300";
+
+/* =====================================================================
+   3) OTHER SETTINGS
+   ---------------------------------------------------------------------
+   Accounts for the 5 members must be created manually in
+   Firebase Console → Authentication → Users → Add user
+   (email = username@privatechat.local, plus a password).
+   Disable any public sign-up there; this app has no registration flow.
+
+   Suggested Firestore security rules (Firestore → Rules):
+
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{db}/documents {
+       function isAdmin(){ return request.auth.uid == "lwVSjwQBnaYkrJnmrNUh4l2Nu3B3"; }
+       match /messages/{id} {
+         allow read: if request.auth != null;
+         allow create: if request.auth != null
+                       && request.resource.data.uid == request.auth.uid;
+         allow update: if request.auth != null
+                       && request.auth.uid != resource.data.uid
+                       && resource.data.seenAt == null
+                       && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seenAt']);
+         allow delete: if request.auth != null
+                       && (isAdmin()
+                           || (resource.data.seenAt != null
+                               && request.time.toMillis() > resource.data.seenAt + 600000));
+       }
+     }
+   }
+   ===================================================================== */
+const EXPIRE_MS = 10 * 60 * 1000;   // 10 minutes after seen
+const CHECK_MS  = 2000;             // periodic check interval
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, updateDoc, deleteDoc, doc }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ---------- Google "G" icon (inline SVG) ---------- */
+const G_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">' +
+  '<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>' +
+  '<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>' +
+  '<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>' +
+  '<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>' +
+  '</svg>';
+const G_URI = "data:image/svg+xml," + encodeURIComponent(G_SVG);
+
+document.getElementById("favicon").href = G_URI;
+document.getElementById("headerLogo").innerHTML = G_SVG;
+
+/* ---------- Dynamic PWA manifest ---------- */
+function makePng(size){
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement("canvas");
+      c.width = c.height = size;
+      const x = c.getContext("2d");
+      x.fillStyle = "#ffffff";
+      x.fillRect(0, 0, size, size);
+      const pad = size * 0.16;
+      x.drawImage(img, pad, pad, size - pad * 2, size - pad * 2);
+      resolve(c.toDataURL("image/png"));
+    };
+    img.onerror = () => resolve(null);
+    img.src = G_URI;
+  });
+}
+async function setupManifest(){
+  try{
+    const [p192, p512] = await Promise.all([makePng(192), makePng(512)]);
+    const icons = [];
+    if (p192) icons.push({ src: p192, sizes: "192x192", type: "image/png", purpose: "any maskable" });
+    if (p512) icons.push({ src: p512, sizes: "512x512", type: "image/png", purpose: "any maskable" });
+    icons.push({ src: G_URI, sizes: "any", type: "image/svg+xml", purpose: "any" });
+    const base = location.href.split("#")[0].split("?")[0];
+    const manifest = {
+      name: "KT", short_name: "KT",
+      id: base, start_url: base, scope: base.replace(/[^/]*$/, ""),
+      display: "standalone", orientation: "any",
+      background_color: "#0b141a", theme_color: "#202c33",
+      icons
+    };
+    const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
+    document.getElementById("manifest-link").href = URL.createObjectURL(blob);
+  }catch(e){ /* manifest is optional */ }
+}
+setupManifest();
+
+/* ---------- DOM refs ---------- */
+const $ = id => document.getElementById(id);
+const loginView = $("login"), chatView = $("chat");
+const loginForm = $("loginForm"), loginBtn = $("loginBtn"), loginError = $("loginError");
+const messagesEl = $("messages"), statusEl = $("status");
+
+function showLoginError(msg){ loginError.textContent = msg || ""; }
+
+/* ---------- Config check ---------- */
+const configMissing = Object.values(firebaseConfig).some(v => !v || String(v).includes("PASTE_"));
+let app, auth, db;
+if (!configMissing){
+  app  = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db   = getFirestore(app);
+}
+
+/* ---------- Helpers ---------- */
+function toEmail(input){
+  const u = input.trim().toLowerCase();
+  if (u === ADMIN_USERNAME) return ADMIN_EMAIL;
+  if (u.includes("@")) return u;
+  return u + "@privatechat.local";
+}
+function nameFromEmail(email){
+  const n = (email || "").split("@")[0];
+  return n || "user";
+}
+function isAdminUser(u){
+  if (!u) return false;
+  return u.uid === ADMIN_UID ||
+         (u.email || "").toLowerCase() === ADMIN_EMAIL ||
+         nameFromEmail(u.email) === ADMIN_USERNAME;
+}
+function fmtTime(ms){
+  return new Date(ms).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+function fmtRemain(ms){
+  const s = Math.max(0, Math.ceil(ms / 1000));
+  return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+}
+const COLORS = ["#53bdeb","#ffb86b","#c792ea","#7fdc8f","#ff8fa3","#f7d774","#6fd3c9"];
+function colorFor(name){
+  let h = 0; for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return COLORS[h % COLORS.length];
+}
+
+/* ---------- Login ---------- */
+loginForm.addEventListener("submit", async e => {
+  e.preventDefault();
+  showLoginError("");
+  if (configMissing){ showLoginError("Firebase config missing."); return; }
+  const username = $("username").value;
+  const password = $("password").value;
+  if (!username.trim() || !password) return;
+  loginBtn.disabled = true;
+  try{
+    await signInWithEmailAndPassword(auth, toEmail(username), password);
+  }catch(err){
+    showLoginError("Login failed.");
+  }finally{
+    loginBtn.disabled = false;
+  }
+});
+
+$("logoutBtn").addEventListener("click", () => { if (auth) signOut(auth); });
+
+/* ---------- Chat state ---------- */
+let currentUser = null, isAdmin = false;
+let unsub = null, timerId = null;
+let messages = [];                 // [{id, ...data}]
+const deleting = new Set();        // ids with a delete in flight
+const marking  = new Set();        // ids with a seen-update in flight
+
+if (auth){
+  onAuthStateChanged(auth, user => {
+    if (user){
+      currentUser = user;
+      isAdmin = isAdminUser(user);
+      statusEl.textContent = nameFromEmail(user.email) + (isAdmin ? " (Admin)" : "") + " • online";
+      loginView.classList.add("hidden");
+      chatView.classList.remove("hidden");
+      $("password").value = "";
+      startChat();
+    }else{
+      currentUser = null; isAdmin = false;
+      stopChat();
+      chatView.classList.add("hidden");
+      loginView.classList.remove("hidden");
+    }
+  });
+}
+
+function startChat(){
+  stopChat();
+  const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
+  unsub = onSnapshot(q, snap => {
+    messages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    render();
+    markSeen();
+    purgeExpired();
+  }, err => {
+    statusEl.textContent = "Connection error";
+  });
+  timerId = setInterval(tick, CHECK_MS);
+}
+function stopChat(){
+  if (unsub){ unsub(); unsub = null; }
+  if (timerId){ clearInterval(timerId); timerId = null; }
+  messages = [];
+  messagesEl.innerHTML = "";
+}
+
+/* ---------- Render ---------- */
+function render(){
+  const nearBottom = messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight < 120;
+  const now = Date.now();
+  messagesEl.innerHTML = "";
+  const visible = messages.filter(m => !(m.seenAt && now - m.seenAt >= EXPIRE_MS));
+  if (!visible.length){
+    const d = document.createElement("div");
+    d.className = "empty"; d.textContent = "No messages yet";
+    messagesEl.appendChild(d);
+    return;
+  }
+  for (const m of visible){
+    const mine = m.uid === currentUser.uid;
+    const row = document.createElement("div");
+    row.className = "row " + (mine ? "me" : "them");
+
+    const b = document.createElement("div");
+    b.className = "bubble";
+
+    if (!mine){
+      const s = document.createElement("div");
+      s.className = "sender";
+      s.textContent = m.username || "user";
+      s.style.color = colorFor(m.username || "user");
+      b.appendChild(s);
+    }
+
+    const t = document.createElement("div");
+    t.className = "text";
+    t.textContent = m.text;
+    b.appendChild(t);
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+
+    if (m.seenAt){
+      const tm = document.createElement("span");
+      tm.className = "timer";
+      tm.dataset.id = m.id;
+      tm.textContent = "⏱ " + fmtRemain(m.seenAt + EXPIRE_MS - now);
+      meta.appendChild(tm);
+    }
+
+    const time = document.createElement("span");
+    time.textContent = fmtTime(m.createdAt || now);
+    meta.appendChild(time);
+
+    if (mine){
+      const tick = document.createElement("span");
+      tick.className = "tick" + (m.seenAt ? " seen" : "");
+      tick.textContent = m.seenAt ? "✓✓" : "✓";
+      meta.appendChild(tick);
+    }
+
+    if (isAdmin){
+      const del = document.createElement("button");
+      del.className = "del"; del.type = "button"; del.textContent = "Delete";
+      del.addEventListener("click", async () => {
+        try{ await deleteDoc(doc(db, "messages", m.id)); }catch(e){}
+      });
+      meta.appendChild(del);
+    }
+
+    b.appendChild(meta);
+    row.appendChild(b);
+    messagesEl.appendChild(row);
+  }
+  if (nearBottom) messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+/* ---------- Seen marking ---------- */
+async function markSeen(){
+  if (!currentUser || document.visibilityState !== "visible") return;
+  for (const m of messages){
+    if (m.uid !== currentUser.uid && !m.seenAt && !marking.has(m.id)){
+      marking.add(m.id);
+      try{ await updateDoc(doc(db, "messages", m.id), { seenAt: Date.now() }); }
+      catch(e){ marking.delete(m.id); }
+    }
+  }
+}
+document.addEventListener("visibilitychange", markSeen);
+window.addEventListener("focus", markSeen);
+
+/* ---------- Periodic timer + auto-delete ---------- */
+async function purgeExpired(){
+  const now = Date.now();
+  for (const m of messages){
+    if (m.seenAt && now - m.seenAt >= EXPIRE_MS && !deleting.has(m.id)){
+      deleting.add(m.id);
+      try{ await deleteDoc(doc(db, "messages", m.id)); }
+      catch(e){ setTimeout(() => deleting.delete(m.id), 15000); }
+    }
+  }
+}
+function tick(){
+  const now = Date.now();
+  let needRender = false;
+  for (const m of messages){
+    if (!m.seenAt) continue;
+    const left = m.seenAt + EXPIRE_MS - now;
+    if (left <= 0){ needRender = true; continue; }
+    const el = messagesEl.querySelector('.timer[data-id="' + m.id + '"]');
+    if (el) el.textContent = "⏱ " + fmtRemain(left);
+  }
+  if (needRender) render();
+  purgeExpired();
+  markSeen();
+}
+
+/* ---------- Send ---------- */
+$("sendForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const input = $("msgInput");
+  const text = input.value.trim();
+  if (!text || !currentUser) return;
+  input.value = "";
+  try{
+    await addDoc(collection(db, "messages"), {
+      text,
+      uid: currentUser.uid,
+      username: nameFromEmail(currentUser.email),
+      createdAt: Date.now(),
+      seenAt: null
+    });
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }catch(err){
+    input.value = text;
+    statusEl.textContent = "Send failed";
+  }
+  input.focus();
+});
+</script>
+</body>
+</html>
